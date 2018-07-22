@@ -18,6 +18,7 @@
 package cat.urv.imas.gui;
 
 import cat.urv.imas.map.Cell;
+import cat.urv.imas.map.PathCell;
 import cat.urv.imas.onthology.GameSettings;
 import java.awt.*;
 import javax.swing.*;
@@ -164,14 +165,20 @@ public class GraphicInterface extends JFrame {
      * @param msg String per mostrar
      */
     public void showStatistics(String msg) {
-        this.jStatisticsPanel.showMessage(msg);
+        this.jStatisticsPanel.showMessage(msg + "\n");
     }
 
     /**
-     * Update the game GUI.
+     * Update the game GUI, given the updated map.
+     * @param map Updated map
      */
-    public void updateGame() {
+    public void updateGame(Cell[][] map) {
+        this.jGamePanel.removeAll();
+        showGameMap(map);
+        
         this.jGamePanel.repaint();
+        this.jGamePanel.revalidate();
+        this.jGamePanel.updateUI();
     }
     
 }

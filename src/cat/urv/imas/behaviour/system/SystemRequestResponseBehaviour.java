@@ -17,16 +17,11 @@
  */
 package cat.urv.imas.behaviour.system;
 
-import cat.urv.imas.agent.AgentType;
 import jade.lang.acl.ACLMessage;
 import jade.lang.acl.MessageTemplate;
 import jade.proto.AchieveREResponder;
 import cat.urv.imas.agent.SystemAgent;
-import cat.urv.imas.map.Cell;
-import cat.urv.imas.map.PathCell;
 import cat.urv.imas.onthology.MessageContent;
-import java.util.List;
-import java.util.Map;
 
 /**
  * A request-responder behaviour for System agent, answering to queries
@@ -34,7 +29,7 @@ import java.util.Map;
  * game information and the System Agent sends an AGREE and then an INFORM
  * with the city information.
  */
-public class RequestResponseBehaviour extends AchieveREResponder {
+public class SystemRequestResponseBehaviour extends AchieveREResponder {
 
     /**
      * Sets up the System agent and the template of messages to catch.
@@ -42,7 +37,7 @@ public class RequestResponseBehaviour extends AchieveREResponder {
      * @param agent The agent owning this behaviour
      * @param mt Template to receive future responses in this conversation
      */
-    public RequestResponseBehaviour(SystemAgent agent, MessageTemplate mt) {
+    public SystemRequestResponseBehaviour(SystemAgent agent, MessageTemplate mt) {
         super(agent, mt);
         agent.log("Waiting REQUESTs from authorized agents");
     }
@@ -67,7 +62,6 @@ public class RequestResponseBehaviour extends AchieveREResponder {
         } catch (Exception e) {
             reply.setPerformative(ACLMessage.FAILURE);
             agent.errorLog(e.getMessage());
-            e.printStackTrace();
         }
         agent.log("Response being prepared");
         return reply;
@@ -97,12 +91,13 @@ public class RequestResponseBehaviour extends AchieveREResponder {
 
         try {
             agent.addElementsForThisSimulationStep();
-            reply.setContentObject(agent.getGame());
+            agent.getStats().setGame(agent.getGame());
+            reply.setContentObject(agent.getStats());
         } catch (Exception e) {
             reply.setPerformative(ACLMessage.FAILURE);
             agent.errorLog(e.toString());
-            e.printStackTrace();
         }
+
         agent.log("Game settings sent");
         return reply;
 
@@ -113,6 +108,7 @@ public class RequestResponseBehaviour extends AchieveREResponder {
      */
     @Override
     public void reset() {
+        // Nothing to do
     }
 
 }

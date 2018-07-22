@@ -48,6 +48,22 @@ public class DiggerInfoAgent extends InfoAgent {
         this.capacity = capacity;
     }
 
+    public int getCapacity() {
+        return capacity;
+    }
+
+    public void setCapacity(int capacity) {
+        this.capacity = capacity;
+    }
+    
+    public void decreaseCapacity() {
+        this.capacity--;
+    }
+    
+    public void increaseCapacity() {
+        this.capacity++;
+    }
+
     /**
      * String representation of this isntance.
      *

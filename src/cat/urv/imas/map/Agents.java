@@ -56,7 +56,8 @@ public class Agents implements java.io.Serializable {
             throw new Exception("There is no agent in cell");
         } else if (agent == null) {
             throw new Exception("No valid agent to be remove (null).");
-        } else if (!agents.get(agent.getType()).contains(agent)) {
+        } 
+        else if (!agents.get(agent.getType()).contains(agent)) {
             throw new Exception("No matching agent to be removed.");
         }
         // if everything is OK, we remove the agent from the cell
@@ -90,8 +91,10 @@ public class Agents implements java.io.Serializable {
 
     public String getMapMessage() {
         StringBuilder string = new StringBuilder("|");
-        for (AgentType type : agents.keySet()) {
-            string.append(type.getShortString()).append(":").append(agents.get(type).size()).append("|");
+        for (AgentType type : AgentType.values()) {
+            if(agents.get(type) != null) {
+                string.append(type.getShortString()).append(":").append(agents.get(type).size()).append("|");
+            }
         }
         string.append("|");
         return string.toString();
@@ -99,7 +102,7 @@ public class Agents implements java.io.Serializable {
 
     public String toString() {
         StringBuilder string = new StringBuilder("(");
-        for (AgentType type : agents.keySet()) {
+        for (AgentType type : AgentType.values()) {
             string.append("(").append(type.getShortString()).append(":").append(agents.get(type).size()).append(")");
         }
         string.append(")");

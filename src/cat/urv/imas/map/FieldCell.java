@@ -63,6 +63,16 @@ public class FieldCell extends Cell {
         return metal;
     }
 
+    public boolean isThereAnyMetal() {
+        if(metal.get(MetalType.GOLD) != null && metal.get(MetalType.GOLD) > 0){
+            return true;
+        }
+        if(metal.get(MetalType.SILVER) != null && metal.get(MetalType.SILVER) > 0){
+            return true;
+        }
+        return false;
+    }
+    
     /**
      * Whenever the metal has been detected, it informs about the
      * current metal on this field. Otherwise, it will behave as if
@@ -78,6 +88,9 @@ public class FieldCell extends Cell {
         return found;
     }
 
+    public boolean isFound() {
+        return found;
+    }
 
     /**
      * Removes an item of the current metal, if any.

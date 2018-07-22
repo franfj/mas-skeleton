@@ -18,8 +18,13 @@
 package cat.urv.imas.onthology;
 
 import cat.urv.imas.agent.AgentType;
+import cat.urv.imas.map.Agents;
 import cat.urv.imas.map.Cell;
 import cat.urv.imas.map.CellType;
+import cat.urv.imas.map.ManufacturingCenterCell;
+import cat.urv.imas.map.PathCell;
+import cat.urv.imas.map.SettableFieldCell;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import javax.xml.bind.annotation.XmlElement;
@@ -36,6 +41,9 @@ import javax.xml.bind.annotation.XmlRootElement;
 @XmlRootElement(name = "GameSettings")
 public class GameSettings implements java.io.Serializable {
 
+    public GameSettings() {
+    }
+          
     /* Default values set to all attributes, just in case. */
     /**
      * Seed for random numbers.
@@ -97,8 +105,7 @@ public class GameSettings implements java.io.Serializable {
      * List of cells per type of cell.
      */
     protected Map<CellType, List<Cell>> cellsOfType;
-
-
+        
     public long getSeed() {
         return seed;
     }
@@ -246,6 +253,62 @@ public class GameSettings implements java.io.Serializable {
             }
         }
         return max;
+    }
+    
+    /**
+     * Gets cells with diggers on them.
+     * @return Cells with diggers
+     */
+    public List<Cell> getCellsWithDiggers() { 
+        List<Cell> cells = new LinkedList<>();
+        for (int i = 0; i < map.length; i++) {
+            for (int j = 0; j < map[i].length; j++) {
+                if (map[i][j] instanceof PathCell) {
+                    Agents agents = ((PathCell) map[i][j]).getAgents();
+                    
+                    if(agents.size() > 0 && agents.get(AgentType.DIGGER) != null){
+                        cells.add(map[i][j]);
+                    }
+                    
+                }
+            }
+        }
+        return cells;
+    }
+    
+    /**
+     * Gets cells with manufacture centers on them.
+     * @return Cells with manufacture centers
+     */
+    public List<Cell> getCellsWithManufactureCenters() { 
+        List<Cell> cells = new LinkedList<>();
+        for (int i = 0; i < map.length; i++) {
+            for (int j = 0; j < map[i].length; j++) {
+                if (map[i][j] instanceof ManufacturingCenterCell) {
+                    ManufacturingCenterCell center = ((ManufacturingCenterCell) map[i][j]);
+                    cells.add(center);
+                }
+            }
+        }
+        return cells;
+    }
+    
+    /**
+     * Gets cells that contains metal.
+     * @return Cells with metal
+     */
+    public List<Cell> getCellsWithMetal() {
+        List<Cell> cells = new LinkedList<>();
+        for (int i = 0; i < map.length; i++) {
+            for (int j = 0; j < map[i].length; j++) {
+                if (map[i][j] instanceof SettableFieldCell) {
+                    if(((SettableFieldCell) map[i][j]).isFound()){
+                        cells.add(map[i][j]);
+                    }
+                }
+            }
+        }
+        return cells;
     }
 
 }

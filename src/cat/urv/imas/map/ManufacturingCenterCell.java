@@ -53,6 +53,14 @@ public class ManufacturingCenterCell extends Cell {
         return false;
     }
 
+    public int getPrice() {
+        return price;
+    }
+
+    public MetalType getMetal() {
+        return metal;
+    }
+
     /* ***************** Map visualization API ********************************/
     @Override
     public void draw(CellVisualizer visual) {

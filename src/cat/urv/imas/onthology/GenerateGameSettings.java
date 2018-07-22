@@ -22,7 +22,7 @@ import javax.xml.namespace.QName;
  */
 public class GenerateGameSettings {
 
-    private static final int STEPS = 600;
+    private static final int STEPS = 100;
     private static final String FILENAME = "game.settings";
 
     /*

@@ -1,4 +1,4 @@
-/**
+ /**
  *  IMAS base code for the practical work.
  *  Copyright (C) 2014 DEIM - URV
  *
@@ -21,7 +21,7 @@ import jade.core.AID;
 import jade.lang.acl.ACLMessage;
 import jade.proto.AchieveREInitiator;
 import cat.urv.imas.agent.CoordinatorAgent;
-import cat.urv.imas.onthology.GameSettings;
+import cat.urv.imas.tools.Stats;
 
 /**
  * Behaviour for the Coordinator agent to deal with AGREE messages.
@@ -32,9 +32,9 @@ import cat.urv.imas.onthology.GameSettings;
  * NOTE: The game is processed by another behaviour that we add after the 
  * INFORM has been processed.
  */
-public class RequesterBehaviour extends AchieveREInitiator {
+public class CoordinatorRequesterBehaviour extends AchieveREInitiator {
 
-    public RequesterBehaviour(CoordinatorAgent agent, ACLMessage requestMsg) {
+    public CoordinatorRequesterBehaviour(CoordinatorAgent agent, ACLMessage requestMsg) {
         super(agent, requestMsg);
         agent.log("Started behaviour to deal with AGREEs");
     }
@@ -57,14 +57,27 @@ public class RequesterBehaviour extends AchieveREInitiator {
      */
     @Override
     protected void handleInform(ACLMessage msg) {
-        CoordinatorAgent agent = (CoordinatorAgent) this.getAgent();
-        agent.log("INFORM received from " + ((AID) msg.getSender()).getLocalName());
-        try {
-            GameSettings game = (GameSettings) msg.getContentObject();
-            agent.setGame(game);
-            agent.log(game.getShortString());
-        } catch (Exception e) {
-            agent.errorLog("Incorrect content: " + e.toString());
+        if (msg != null && msg.getContent() != null){
+            CoordinatorAgent agent = (CoordinatorAgent) this.getAgent();
+            
+            if (msg.getContent().equals("new step")) {
+                agent.log("INFORM received: " + msg.getContent());
+                agent.requestMap();
+            }
+            else {
+                agent.log("INFORM received from " + ((AID) msg.getSender()).getLocalName());
+                try {
+                    Stats stats = (Stats) msg.getContentObject();
+                    agent.setGame(stats.getGame());
+                    agent.setStats(stats);
+                    agent.log(stats.getGame().getShortString());
+
+                    agent.simulateSteps();
+                    
+                } catch (Exception e) {
+                    agent.errorLog("Incorrect content: " + e.toString());
+                }
+            }
         }
     }
 

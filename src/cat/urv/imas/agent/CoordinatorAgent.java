@@ -17,14 +17,20 @@
  */
 package cat.urv.imas.agent;
 
+import cat.urv.imas.behaviour.common.InformNewStep;
+import cat.urv.imas.behaviour.coordinator.CoordinatorMessageReceiver;
 import cat.urv.imas.onthology.GameSettings;
-import cat.urv.imas.behaviour.coordinator.RequesterBehaviour;
+import cat.urv.imas.behaviour.coordinator.CoordinatorRequesterBehaviour;
 import cat.urv.imas.onthology.MessageContent;
+import cat.urv.imas.tools.Stats;
 import jade.core.*;
 import jade.domain.*;
 import jade.domain.FIPAAgentManagement.*;
 import jade.domain.FIPANames.InteractionProtocol;
 import jade.lang.acl.*;
+import java.io.IOException;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /**
  * The main Coordinator agent. 
@@ -33,6 +39,8 @@ import jade.lang.acl.*;
  */
 public class CoordinatorAgent extends ImasAgent {
 
+    private Stats stats;
+    
     /**
      * Game settings in use.
      */
@@ -49,6 +57,14 @@ public class CoordinatorAgent extends ImasAgent {
         super(AgentType.COORDINATOR);
     }
 
+    public Stats getStats() {
+        return stats;
+    }
+
+    public void setStats(Stats stats) {
+        this.stats = stats;
+    }
+    
     /**
      * Agent setup method - called when it first come on-line. Configuration of
      * language to use, ontology and initialization of behaviours.
@@ -83,7 +99,13 @@ public class CoordinatorAgent extends ImasAgent {
         this.systemAgent = UtilsAgents.searchAgent(this, searchCriterion);
         // searchAgent is a blocking method, so we will obtain always a correct AID
 
-        /* ********************************************************************/
+        this.addBehaviour(new CoordinatorMessageReceiver(this));
+
+        // setup finished. When we receive the last inform, the agent itself will add
+        // a behaviour to send/receive actions
+    }
+    
+    public void requestMap() {
         ACLMessage initialRequest = new ACLMessage(ACLMessage.REQUEST);
         initialRequest.clearAllReceiver();
         initialRequest.addReceiver(this.systemAgent);
@@ -92,17 +114,16 @@ public class CoordinatorAgent extends ImasAgent {
         try {
             initialRequest.setContent(MessageContent.GET_MAP);
             log("Request message content:" + initialRequest.getContent());
+            this.addBehaviour(new CoordinatorRequesterBehaviour(this, initialRequest));
         } catch (Exception e) {
             e.printStackTrace();
         }
-
-        //we add a behaviour that sends the message and waits for an answer
-        this.addBehaviour(new RequesterBehaviour(this, initialRequest));
-
-        // setup finished. When we receive the last inform, the agent itself will add
-        // a behaviour to send/receive actions
     }
 
+    public void simulateSteps() { 
+        this.addBehaviour(new InformNewStep(this, AgentType.DIGGER_COORDINATOR));
+    }
+    
     /**
      * Update the game settings.
      *
@@ -119,6 +140,21 @@ public class CoordinatorAgent extends ImasAgent {
      */
     public GameSettings getGame() {
         return this.game;
+    }
+
+    public void propagateNewMap() {
+        ACLMessage msg = new ACLMessage(ACLMessage.INFORM);
+        msg.setSender(this.getAID());
+        msg.addReceiver(systemAgent);
+
+        try {
+            msg.setContentObject(this.stats);
+        } catch (IOException ex) {
+            Logger.getLogger(DiggerAgent.class.getName()).log(Level.SEVERE, null, ex);
+        }
+
+        log("Sending new map to " + systemAgent.getLocalName());
+        send(msg);
     }
 
 }

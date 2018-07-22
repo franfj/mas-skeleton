@@ -17,7 +17,6 @@
  */
 package cat.urv.imas.map;
 
-import cat.urv.imas.agent.AgentType;
 import cat.urv.imas.gui.CellVisualizer;
 import cat.urv.imas.onthology.InfoAgent;
 
@@ -94,11 +93,12 @@ public class PathCell extends Cell {
      */
     @Override
     public String toStringSpecialization() {
-        if (this.isThereADiggerAgentWorking()) {
-            return "(agent " + agents.get(AgentType.DIGGER).toString() + ")";
-        } else {
-            return agents.toString();
-        }
+//        if (this.isThereADiggerAgentWorking()) {
+//            return "(agent " + agents.get(AgentType.DIGGER).toString() + ")";
+//        } else {
+//            return agents.toString();
+//        }
+        return "";
     }
 
     /* ***************** Map visualization API ********************************/
@@ -116,6 +116,7 @@ public class PathCell extends Cell {
                             visual.drawProspector(this);
                             break;
                         case DIGGER:
+                            String asd = "(" + this.getRow() + ", " + this.getCol() + ")";
                             visual.drawDigger(this);
                             break;
                         default:

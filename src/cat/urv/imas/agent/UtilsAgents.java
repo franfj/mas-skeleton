@@ -29,6 +29,8 @@ import jade.domain.FIPAAgentManagement.ServiceDescription;
 import jade.wrapper.AgentContainer;
 import jade.wrapper.AgentController;
 import jade.wrapper.StaleProxyException;
+import java.util.LinkedList;
+import java.util.List;
 
 /**
  * Utility class for agents.
@@ -38,7 +40,7 @@ public class UtilsAgents {
     /**
      * After each search of an agent, we will wait for 2 seconds before retrying.
      */
-    private static final long DELAY = 2000;
+    private static final long DELAY = 4000;
     
     /**
      * To prevent being instanced.
@@ -81,6 +83,39 @@ public class UtilsAgents {
         }
         return searchedAgent;
     }
+    
+    /** To search multiple agents of a certain type
+     *
+     * @param parent Agent
+     * @param sd ServiceDescription search criterion
+     * @return AID of the agent if it is foun, it is a *blocking* method
+     */
+    public static List<AID> searchMultipleAgents(Agent parent, ServiceDescription sd) {
+        List<AID> searchedAgents = new LinkedList<>();
+        DFAgentDescription dfd = new DFAgentDescription();
+        dfd.addServices(sd);
+        try {
+            while (true) {
+                SearchConstraints c = new SearchConstraints();
+                c.setMaxResults(new Long(-1));
+                DFAgentDescription[] result = DFService.search(parent, dfd, c);
+                if (result.length > 0) {
+                    for(int i = 0; i < result.length; ++i) {
+                        dfd = result[i];
+                        searchedAgents.add(dfd.getName());
+                    }
+                    break;
+                }
+                Thread.sleep(DELAY);
+
+            }
+        } catch (Exception fe) {
+            System.err.println("ERROR: Cannot search the expected agent from parent " + parent.getLocalName());
+            fe.printStackTrace();
+            parent.doDelete();
+        }
+        return searchedAgents;
+    }
 
     /**
      * To create an agent in a given container
@@ -114,7 +149,13 @@ public class UtilsAgents {
             Profile p = new ProfileImpl();
             AgentContainer container = rt.createAgentContainer(p);
 
+            if(arguments == null){
+                arguments = new Object[] {};
+            } 
+            
             AgentController controller = container.createNewAgent(agentName, className, arguments);
+            
+            
             controller.start();
         } catch (Exception e) {
             System.err.println("ERROR: Cannot create agent " + agentName + " of class " + className);
@@ -144,6 +185,28 @@ public class UtilsAgents {
             e.printStackTrace();
         }
         return container;
+    }
+    
+    /**
+     * To create a list of agents and the container together, 
+     * returning the container.
+     *
+     * @param container The container
+     * @param agentNamePrefix The agent name prefix used for all agents created
+     * @param nAgents Number of agents
+     * @param className String Class
+     * @param arguments Object[] Arguments
+     */
+    public static void createListOfAgents(AgentContainer container, String agentNamePrefix, String className, int nAgents, Object[] arguments){
+        for(int i = 0; i < nAgents; ++i){
+            try {
+                AgentController controller = container.createNewAgent(agentNamePrefix + i, className, arguments);
+                controller.start();
+            } catch (StaleProxyException e) {
+                System.err.println("ERROR: Cannot create agent " + agentNamePrefix + i + " of class " + className);
+                e.printStackTrace();
+            }
+        }
     }
 
 }
